@@ -1,0 +1,9 @@
+# Environment variables
+.env
+
+# OS generated files (MAC)
+.DS_Store
+Thumbs.db
+
+# app build result (build code, create binary, file binary kita exclude)
+api-contact-form
