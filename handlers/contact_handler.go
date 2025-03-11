@@ -1,4 +1,4 @@
-// Package handlers contains the http handler implementations for managing contacts.
+// Package handlers contains the HTTP handler implementations for managing contacts.
 //
 // It defines the ContactHandler struct, which provides methods to handle
 // CRUD (Create, Read, Update, Delete) operations for contact entities.
@@ -7,10 +7,13 @@
 package handlers
 
 import (
+	"api-contact-form/requests"
+	"api-contact-form/responses"
 	"api-contact-form/services"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ContactHandler handles HTTP requests related to contact operations.
@@ -20,7 +23,7 @@ type ContactHandler struct {
 
 // NewContactHandler creates a new instance of ContactHandler with the provided ContactService.
 func NewContactHandler(service services.ContactService) *ContactHandler {
-	return &ContactHandler{service: service}
+	return &ContactHandler{service}
 }
 
 // CreateContact handles the creation of a new contact.
@@ -31,7 +34,7 @@ func NewContactHandler(service services.ContactService) *ContactHandler {
 func (h *ContactHandler) CreateContact(c *gin.Context) {
 	var req requests.ContactRequest
 
-	//	Bind the JSON payload to the ContactRequest struct.
+	// Bind the JSON payload to the ContactRequest struct.
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, responses.APIResponse{
 			Code:    "BAD_REQUEST",
@@ -52,7 +55,7 @@ func (h *ContactHandler) CreateContact(c *gin.Context) {
 		return
 	}
 
-	//	Respond with the created contact and a success message.
+	// Respond with the created contact and a success message.
 	c.JSON(http.StatusCreated, responses.APIResponse{
 		Code:    "CREATED",
 		Message: "Contact created successfully",
@@ -63,7 +66,7 @@ func (h *ContactHandler) CreateContact(c *gin.Context) {
 // GetContacts retrieves all contacts.
 //
 // It interacts with the service layer to fetch all contact records.
-// On Success, it returns the list of contacts with a 200 status code.
+// On success, it returns the list of contacts with a 200 status code.
 // In case of an error, it responds with a 500 status code and an error message.
 func (h *ContactHandler) GetContacts(c *gin.Context) {
 	// Fetch all contacts using the service layer.
@@ -77,7 +80,7 @@ func (h *ContactHandler) GetContacts(c *gin.Context) {
 		return
 	}
 
-	//	Convert the contact models to response formats.
+	// Convert the contact models to response formats.
 	var contactResponses []responses.ContactResponse
 	for _, contact := range contacts {
 		contactResponses = append(contactResponses, responses.ContactResponseFromModel(&contact))
@@ -94,10 +97,10 @@ func (h *ContactHandler) GetContacts(c *gin.Context) {
 // GetContact retrieves a single contact by its ID.
 //
 // It expects the contact ID as a URL parameter.
-// If the ID is invalid or the contact does not exist, it return an appropriate error response.
-// On success, it returns the contact detail with a 200 status code.
+// If the ID is invalid or the contact does not exist, it returns an appropriate error response.
+// On success, it returns the contact details with a 200 status code.
 func (h *ContactHandler) GetContact(c *gin.Context) {
-	//	Retrieve the 'id' parameter from the URL.
+	// Retrieve the 'id' parameter from the URL.
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -109,7 +112,7 @@ func (h *ContactHandler) GetContact(c *gin.Context) {
 		return
 	}
 
-	//	Fetch the contact by ID using the service layer.
+	// Fetch the contact by ID using the service layer.
 	contact, err := h.service.GetContactByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, responses.APIResponse{
@@ -120,7 +123,7 @@ func (h *ContactHandler) GetContact(c *gin.Context) {
 		return
 	}
 
-	//	Respond with the contact details.
+	// Respond with the contact details.
 	c.JSON(http.StatusOK, responses.APIResponse{
 		Code:    "SUCCESS",
 		Message: "Contact retrieved successfully",
@@ -132,7 +135,7 @@ func (h *ContactHandler) GetContact(c *gin.Context) {
 //
 // It expects the contact ID as a URL parameter and a JSON payload matching the ContactRequest structure.
 // If the ID is invalid or the contact does not exist, it returns an appropriate error response.
-// On Successful update,it returns the updated contact with a 200 status code.
+// On successful update, it returns the updated contact with a 200 status code.
 func (h *ContactHandler) UpdateContact(c *gin.Context) {
 	// Retrieve the 'id' parameter from the URL.
 	idParam := c.Param("id")
@@ -148,7 +151,7 @@ func (h *ContactHandler) UpdateContact(c *gin.Context) {
 
 	var req requests.ContactRequest
 
-	//	Bind the JSON payload to the ContactRequest struct.
+	// Bind the JSON payload to the ContactRequest struct.
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, responses.APIResponse{
 			Code:    "BAD_REQUEST",
@@ -158,18 +161,18 @@ func (h *ContactHandler) UpdateContact(c *gin.Context) {
 		return
 	}
 
-	// Use the service layer to update the contact
+	// Use the service layer to update the contact.
 	contact, err := h.service.UpdateContact(uint(id), &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responses.APIResponse{
-			Code:    "BAD_REQUEST",
+		c.JSON(http.StatusInternalServerError, responses.APIResponse{
+			Code:    "INTERNAL_SERVER_ERROR",
 			Message: err.Error(),
 			Data:    nil,
 		})
 		return
 	}
 
-	//	Respond with the updated contact and a success message.
+	// Respond with the updated contact and a success message.
 	c.JSON(http.StatusOK, responses.APIResponse{
 		Code:    "SUCCESS",
 		Message: "Contact updated successfully",
@@ -180,8 +183,8 @@ func (h *ContactHandler) UpdateContact(c *gin.Context) {
 // DeleteContact removes a contact by its ID.
 //
 // It expects the contact ID as a URL parameter.
-// If the ID is invalid or the contact does not exist,it returns an appropriate error response.
-// On Successful deletion, it returns a success message with a 200 status code.
+// If the ID is invalid or the contact does not exist, it returns an appropriate error response.
+// On successful deletion, it returns a success message with a 200 status code.
 func (h *ContactHandler) DeleteContact(c *gin.Context) {
 	// Retrieve the 'id' parameter from the URL.
 	idParam := c.Param("id")
@@ -195,7 +198,7 @@ func (h *ContactHandler) DeleteContact(c *gin.Context) {
 		return
 	}
 
-	//	Use the service layer to delete the contact.
+	// Use the service layer to delete the contact.
 	err = h.service.DeleteContact(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.APIResponse{
@@ -203,9 +206,10 @@ func (h *ContactHandler) DeleteContact(c *gin.Context) {
 			Message: err.Error(),
 			Data:    nil,
 		})
+		return
 	}
 
-	//	Respond with a success message.
+	// Respond with a success message.
 	c.JSON(http.StatusOK, responses.APIResponse{
 		Code:    "SUCCESS",
 		Message: "Contact deleted successfully",

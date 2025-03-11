@@ -11,7 +11,6 @@ import (
 	"api-contact-form/models"
 	"api-contact-form/repositories"
 	"api-contact-form/requests"
-
 	"github.com/go-playground/validator/v10"
 )
 
